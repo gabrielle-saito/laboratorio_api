@@ -11,7 +11,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.api.v1 import rotas_calculo, rotas_demo
+from app.api.v1 import rotas_calculo
 from app.dominio import erros
 from app.infra.log import entrar_no_contexto, log, novo_request_id
 
@@ -21,7 +21,6 @@ app = FastAPI(
     description="Fatia vertical: rota -> service -> motor puro -> repositorio.",
 )
 app.include_router(rotas_calculo.router)
-app.include_router(rotas_demo.router)
 
 
 @app.middleware("http")
