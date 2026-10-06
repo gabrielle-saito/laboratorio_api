@@ -93,11 +93,18 @@ async def h_ep(request: Request, exc: erros.EnergiaProdutoInvalida):
                     "Energia do produto invalida", str(exc), request)
 
 
-# TODO PASSO 3: faltam os outros dois handlers. Sem eles, uma excecao de dominio
-# perfeitamente prevista sai como 500 -- e 500 significa "erro nosso", nao
-# "seu pedido nao faz sentido". Siga o molde de h_ep acima:
-#
-#   erros.FluxosInsuficientes        -> 422, type "fluxos-insuficientes"
-#   erros.FatorConversaoNaoEncontrado -> 422, type "fator-conversao-nao-encontrado"
-#
-# Confira em /docs e com a requisicao de inventario vazio do PASSO 3.
+@app.exception_handler(erros.FluxosInsuficientes)
+async def h_fi(request: Request, exc: erros.FluxosInsuficientes):
+    # 422: inventario bem formado, mas algum indice fica indefinido
+    log("calculo.recusado", level="warning", erro="fluxos-insuficientes")
+    return _problem(status.HTTP_422_UNPROCESSABLE_ENTITY, "fluxos-insuficientes",
+                    "Fluxos insuficientes", str(exc), request)
+
+
+@app.exception_handler(erros.FatorConversaoNaoEncontrado)
+async def h_fc(request: Request, exc: erros.FatorConversaoNaoEncontrado):
+    # 422: recurso sem transformidade cadastrada na versao vigente
+    log("calculo.recusado", level="warning", erro="fator-conversao-nao-encontrado")
+    return _problem(status.HTTP_422_UNPROCESSABLE_ENTITY, "fator-conversao-nao-encontrado",
+                    "Fator de conversao nao encontrado", str(exc), request,
+                    {"recurso": exc.recurso, "versao": exc.versao})
